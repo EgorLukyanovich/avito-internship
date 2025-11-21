@@ -9,11 +9,14 @@ import (
 )
 
 func main() {
-	storage, _ := app.InitDB()
+	storage, err := app.InitDB()
+	if err != nil {
+		log.Fatalf("DB initialization failed: %v", err)
+	}
 
 	defer storage.DB.Close()
 
-	router := routing.NewRouter(storage)
+	router := routing.NewRouter(*storage)
 
 	log.Println("Starting server on :8080")
 	log.Fatal(http.ListenAndServe(":8080", router))

@@ -12,5 +12,19 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
 
-  volumes:
-    pgdata:
+  app:
+    build: ./ 
+    container_name: avito_app
+    restart: always
+    depends_on:
+      - db
+    env_file:
+      - .env
+    volumes:
+      - ./.env:/app/.env
+    ports:
+      - "8080:8080"
+
+
+volumes:
+  pgdata:
