@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createPullRequest = `-- name: CreatePullRequest :exec
@@ -59,7 +57,7 @@ type GetPullRequestShortByReviewerRow struct {
 	Status          PrStatus
 }
 
-func (q *Queries) GetPullRequestShortByReviewer(ctx context.Context, reviewerID uuid.UUID) ([]GetPullRequestShortByReviewerRow, error) {
+func (q *Queries) GetPullRequestShortByReviewer(ctx context.Context, reviewerID string) ([]GetPullRequestShortByReviewerRow, error) {
 	rows, err := q.db.QueryContext(ctx, getPullRequestShortByReviewer, reviewerID)
 	if err != nil {
 		return nil, err
@@ -90,7 +88,7 @@ func (q *Queries) GetPullRequestShortByReviewer(ctx context.Context, reviewerID 
 const mergePullRequest = `-- name: MergePullRequest :one
 UPDATE pull_requests
 SET status = 'MERGED', merged_at = NOW()
-WHERE pull_request_id = $1
+WHERE pull_request_id = $1 AND status <> 'MERGED'
 RETURNING pull_request_id, pull_request_name, author_id, status, created_at, merged_at
 `
 

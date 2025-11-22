@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const createTeam = `-- name: CreateTeam :exec
@@ -24,10 +22,11 @@ const getTeamMembers = `-- name: GetTeamMembers :many
 SELECT u.user_id, u.username, u.is_active
 FROM users u
 WHERE u.team_name = $1
+ORDER BY u.user_id
 `
 
 type GetTeamMembersRow struct {
-	UserID   uuid.UUID
+	UserID   string
 	Username string
 	IsActive bool
 }
@@ -53,4 +52,15 @@ func (q *Queries) GetTeamMembers(ctx context.Context, teamName string) ([]GetTea
 		return nil, err
 	}
 	return items, nil
+}
+
+const teamExists = `-- name: TeamExists :one
+SELECT team_name FROM teams WHERE team_name = $1
+`
+
+func (q *Queries) TeamExists(ctx context.Context, teamName string) (string, error) {
+	row := q.db.QueryRowContext(ctx, teamExists, teamName)
+	var team_name string
+	err := row.Scan(&team_name)
+	return team_name, err
 }

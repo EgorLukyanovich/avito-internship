@@ -16,7 +16,7 @@ type Storage struct {
 	DB      *sql.DB
 }
 
-func InitDB() (*Storage, error) {
+func InitDB() (*Storage, string, error) {
 	_ = godotenv.Load()
 
 	dataBaseUrl := os.Getenv("DATABASE_URL")
@@ -29,6 +29,11 @@ func InitDB() (*Storage, error) {
 		log.Fatal("Failed to open a database:", err)
 	}
 
+	portString := os.Getenv("SERVER_PORT")
+	if portString == "" {
+		log.Fatal("Port string is not found in .env")
+	}
+
 	db.PingContext(context.Background())
 
 	queries := DB.New(db)
@@ -38,5 +43,5 @@ func InitDB() (*Storage, error) {
 		DB:      db,
 	}
 
-	return storage, nil
+	return storage, portString, nil
 }

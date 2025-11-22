@@ -7,15 +7,13 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const getUser = `-- name: GetUser :one
 SELECT user_id, username, team_name, is_active FROM users WHERE user_id = $1
 `
 
-func (q *Queries) GetUser(ctx context.Context, userID uuid.UUID) (User, error) {
+func (q *Queries) GetUser(ctx context.Context, userID string) (User, error) {
 	row := q.db.QueryRowContext(ctx, getUser, userID)
 	var i User
 	err := row.Scan(
@@ -35,7 +33,7 @@ RETURNING user_id, username, team_name, is_active
 `
 
 type SetUserActiveParams struct {
-	UserID   uuid.UUID
+	UserID   string
 	IsActive bool
 }
 
@@ -61,7 +59,7 @@ SET username = excluded.username,
 `
 
 type UpsertUserParams struct {
-	UserID   uuid.UUID
+	UserID   string
 	Username string
 	TeamName string
 	IsActive bool

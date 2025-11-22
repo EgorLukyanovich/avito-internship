@@ -7,8 +7,6 @@ package db
 
 import (
 	"context"
-
-	"github.com/google/uuid"
 )
 
 const assignReviewer = `-- name: AssignReviewer :exec
@@ -18,8 +16,8 @@ ON CONFLICT DO NOTHING
 `
 
 type AssignReviewerParams struct {
-	PullRequestID uuid.UUID
-	ReviewerID    uuid.UUID
+	PullRequestID string
+	ReviewerID    string
 }
 
 func (q *Queries) AssignReviewer(ctx context.Context, arg AssignReviewerParams) error {
@@ -33,8 +31,8 @@ WHERE pull_request_id = $1 AND reviewer_id = $2
 `
 
 type DeleteReviewerParams struct {
-	PullRequestID uuid.UUID
-	ReviewerID    uuid.UUID
+	PullRequestID string
+	ReviewerID    string
 }
 
 func (q *Queries) DeleteReviewer(ctx context.Context, arg DeleteReviewerParams) error {
@@ -45,17 +43,18 @@ func (q *Queries) DeleteReviewer(ctx context.Context, arg DeleteReviewerParams) 
 const getReviewers = `-- name: GetReviewers :many
 SELECT reviewer_id FROM pull_request_reviewers
 WHERE pull_request_id = $1
+ORDER BY reviewer_id
 `
 
-func (q *Queries) GetReviewers(ctx context.Context, pullRequestID uuid.UUID) ([]uuid.UUID, error) {
+func (q *Queries) GetReviewers(ctx context.Context, pullRequestID string) ([]string, error) {
 	rows, err := q.db.QueryContext(ctx, getReviewers, pullRequestID)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []uuid.UUID
+	var items []string
 	for rows.Next() {
-		var reviewer_id uuid.UUID
+		var reviewer_id string
 		if err := rows.Scan(&reviewer_id); err != nil {
 			return nil, err
 		}
@@ -68,4 +67,20 @@ func (q *Queries) GetReviewers(ctx context.Context, pullRequestID uuid.UUID) ([]
 		return nil, err
 	}
 	return items, nil
+}
+
+const isReviewerAssigned = `-- name: IsReviewerAssigned :one
+SELECT reviewer_id FROM pull_request_reviewers WHERE pull_request_id = $1 AND reviewer_id = $2
+`
+
+type IsReviewerAssignedParams struct {
+	PullRequestID string
+	ReviewerID    string
+}
+
+func (q *Queries) IsReviewerAssigned(ctx context.Context, arg IsReviewerAssignedParams) (string, error) {
+	row := q.db.QueryRowContext(ctx, isReviewerAssigned, arg.PullRequestID, arg.ReviewerID)
+	var reviewer_id string
+	err := row.Scan(&reviewer_id)
+	return reviewer_id, err
 }

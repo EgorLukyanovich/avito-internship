@@ -8,7 +8,7 @@ SELECT * FROM pull_requests WHERE pull_request_id = $1;
 -- name: MergePullRequest :one
 UPDATE pull_requests
 SET status = 'MERGED', merged_at = NOW()
-WHERE pull_request_id = $1
+WHERE pull_request_id = $1 AND status <> 'MERGED'
 RETURNING *;
 
 -- name: GetPullRequestShortByReviewer :many

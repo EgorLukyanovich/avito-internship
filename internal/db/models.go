@@ -8,8 +8,6 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
-
-	"github.com/google/uuid"
 )
 
 type PrStatus string
@@ -64,8 +62,8 @@ type PullRequest struct {
 }
 
 type PullRequestReviewer struct {
-	PullRequestID uuid.UUID
-	ReviewerID    uuid.UUID
+	PullRequestID string
+	ReviewerID    string
 }
 
 type Team struct {
@@ -73,7 +71,7 @@ type Team struct {
 }
 
 type User struct {
-	UserID   uuid.UUID
+	UserID   string
 	Username string
 	TeamName string
 	IsActive bool
