@@ -5,7 +5,7 @@ import (
 	"net/http"
 
 	"github.com/egor_lukyanovich/avito/internal/db"
-	models "github.com/egor_lukyanovich/avito/internal/model"
+	models "github.com/egor_lukyanovich/avito/internal/models"
 	json_resp "github.com/egor_lukyanovich/avito/pkg/response"
 )
 

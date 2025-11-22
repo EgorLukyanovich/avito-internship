@@ -4,7 +4,7 @@ import (
 	"log"
 	"net/http"
 
-	team "github.com/egor_lukyanovich/avito/internal/handlers"
+	handlers "github.com/egor_lukyanovich/avito/internal/handlers"
 	"github.com/egor_lukyanovich/avito/internal/routing"
 	"github.com/egor_lukyanovich/avito/pkg/app"
 )
@@ -23,11 +23,18 @@ func main() {
 
 	defer storage.DB.Close()
 
-	teamHandlers := team.NewTeamHandlers(storage.Queries)
+	teamHandlers := handlers.NewTeamHandlers(storage.Queries)
+	userHandlers := handlers.NewUserHandlers(storage.Queries)
 	router := routing.NewRouter(*storage)
 
 	router.Post("/team/add", teamHandlers.AddTeam)
 	router.Get("/team/get", teamHandlers.GetTeam)
+
+	router.Get("/users/get", userHandlers.GetUser)
+	router.Get("/users/getReview", userHandlers.GetPRsForReview)
+	router.Delete("/users/delete", userHandlers.DeleteUser)
+	router.Post("/users/setIsActive", userHandlers.SetUserActive)
+	router.Post("/users/upsertUser", userHandlers.UpsertUser)
 
 	server := &http.Server{
 		Handler: router,

@@ -9,6 +9,22 @@ import (
 	"context"
 )
 
+const addPullRequestReviewer = `-- name: AddPullRequestReviewer :exec
+INSERT INTO pull_request_reviewers (pull_request_id, reviewer_id)
+VALUES ($1, $2)
+ON CONFLICT DO NOTHING
+`
+
+type AddPullRequestReviewerParams struct {
+	PullRequestID string
+	ReviewerID    string
+}
+
+func (q *Queries) AddPullRequestReviewer(ctx context.Context, arg AddPullRequestReviewerParams) error {
+	_, err := q.db.ExecContext(ctx, addPullRequestReviewer, arg.PullRequestID, arg.ReviewerID)
+	return err
+}
+
 const createPullRequest = `-- name: CreatePullRequest :exec
 INSERT INTO pull_requests (pull_request_id, pull_request_name, author_id)
 VALUES ($1, $2, $3)
@@ -66,6 +82,47 @@ func (q *Queries) GetPullRequestShortByReviewer(ctx context.Context, reviewerID 
 	var items []GetPullRequestShortByReviewerRow
 	for rows.Next() {
 		var i GetPullRequestShortByReviewerRow
+		if err := rows.Scan(
+			&i.PullRequestID,
+			&i.PullRequestName,
+			&i.AuthorID,
+			&i.Status,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const listPullRequestsShort = `-- name: ListPullRequestsShort :many
+SELECT pull_request_id, pull_request_name, author_id, status
+FROM pull_requests
+ORDER BY created_at DESC
+`
+
+type ListPullRequestsShortRow struct {
+	PullRequestID   string
+	PullRequestName string
+	AuthorID        string
+	Status          PrStatus
+}
+
+func (q *Queries) ListPullRequestsShort(ctx context.Context) ([]ListPullRequestsShortRow, error) {
+	rows, err := q.db.QueryContext(ctx, listPullRequestsShort)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []ListPullRequestsShortRow
+	for rows.Next() {
+		var i ListPullRequestsShortRow
 		if err := rows.Scan(
 			&i.PullRequestID,
 			&i.PullRequestName,

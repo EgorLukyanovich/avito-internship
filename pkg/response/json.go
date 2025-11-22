@@ -5,7 +5,7 @@ import (
 	"log"
 	"net/http"
 
-	models "github.com/egor_lukyanovich/avito/internal/model"
+	models "github.com/egor_lukyanovich/avito/internal/models"
 )
 
 func RespondError(w http.ResponseWriter, code int, errCode, msg string) {
