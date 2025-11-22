@@ -18,6 +18,75 @@ func (q *Queries) DeleteUser(ctx context.Context, userID string) error {
 	return err
 }
 
+const getActiveReplacementCandidates = `-- name: GetActiveReplacementCandidates :many
+SELECT u.user_id
+FROM users u
+WHERE u.team_name = (
+    SELECT inner_u.team_name FROM users inner_u WHERE inner_u.user_id = $1
+)
+AND u.is_active = TRUE
+AND u.user_id <> $1
+`
+
+func (q *Queries) GetActiveReplacementCandidates(ctx context.Context, userID string) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getActiveReplacementCandidates, userID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var user_id string
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
+const getActiveTeamReviewCandidates = `-- name: GetActiveTeamReviewCandidates :many
+SELECT u.user_id
+FROM users u
+WHERE u.team_name = $1
+  AND u.is_active = TRUE
+  AND u.user_id <> $2
+`
+
+type GetActiveTeamReviewCandidatesParams struct {
+	TeamName string
+	UserID   string
+}
+
+func (q *Queries) GetActiveTeamReviewCandidates(ctx context.Context, arg GetActiveTeamReviewCandidatesParams) ([]string, error) {
+	rows, err := q.db.QueryContext(ctx, getActiveTeamReviewCandidates, arg.TeamName, arg.UserID)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []string
+	for rows.Next() {
+		var user_id string
+		if err := rows.Scan(&user_id); err != nil {
+			return nil, err
+		}
+		items = append(items, user_id)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getUser = `-- name: GetUser :one
 SELECT user_id, username, team_name, is_active FROM users WHERE user_id = $1
 `

@@ -17,3 +17,19 @@ SELECT * FROM users WHERE user_id = $1;
 
 -- name: DeleteUser :exec
 DELETE FROM users WHERE user_id = $1;
+
+-- name: GetActiveTeamReviewCandidates :many
+SELECT u.user_id
+FROM users u
+WHERE u.team_name = $1
+  AND u.is_active = TRUE
+  AND u.user_id <> $2;
+
+-- name: GetActiveReplacementCandidates :many
+SELECT u.user_id
+FROM users u
+WHERE u.team_name = (
+    SELECT inner_u.team_name FROM users inner_u WHERE inner_u.user_id = $1
+)
+AND u.is_active = TRUE
+AND u.user_id <> $1;

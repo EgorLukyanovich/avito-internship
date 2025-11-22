@@ -162,3 +162,14 @@ func (q *Queries) MergePullRequest(ctx context.Context, pullRequestID string) (P
 	)
 	return i, err
 }
+
+const pullRequestExists = `-- name: PullRequestExists :one
+SELECT pull_request_id FROM pull_requests WHERE pull_request_id = $1
+`
+
+func (q *Queries) PullRequestExists(ctx context.Context, pullRequestID string) (string, error) {
+	row := q.db.QueryRowContext(ctx, pullRequestExists, pullRequestID)
+	var pull_request_id string
+	err := row.Scan(&pull_request_id)
+	return pull_request_id, err
+}

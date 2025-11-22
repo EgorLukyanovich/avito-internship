@@ -26,3 +26,6 @@ WHERE ar.reviewer_id = $1;
 SELECT pull_request_id, pull_request_name, author_id, status
 FROM pull_requests
 ORDER BY created_at DESC;
+
+-- name: PullRequestExists :one
+SELECT pull_request_id FROM pull_requests WHERE pull_request_id = $1;
