@@ -1,6 +1,6 @@
 -- name: CreatePullRequest :exec
-INSERT INTO pull_requests (pull_request_id, pull_request_name, author_id)
-VALUES ($1, $2, $3);
+INSERT INTO pull_requests (pull_request_id, pull_request_name, author_id, created_at)
+VALUES ($1, $2, $3, $4);
 
 -- name: GetPullRequest :one
 SELECT * FROM pull_requests WHERE pull_request_id = $1;

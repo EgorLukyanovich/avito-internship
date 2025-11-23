@@ -7,6 +7,7 @@ package db
 
 import (
 	"context"
+	"time"
 )
 
 const addPullRequestReviewer = `-- name: AddPullRequestReviewer :exec
@@ -26,18 +27,24 @@ func (q *Queries) AddPullRequestReviewer(ctx context.Context, arg AddPullRequest
 }
 
 const createPullRequest = `-- name: CreatePullRequest :exec
-INSERT INTO pull_requests (pull_request_id, pull_request_name, author_id)
-VALUES ($1, $2, $3)
+INSERT INTO pull_requests (pull_request_id, pull_request_name, author_id, created_at)
+VALUES ($1, $2, $3, $4)
 `
 
 type CreatePullRequestParams struct {
 	PullRequestID   string
 	PullRequestName string
 	AuthorID        string
+	CreatedAt       time.Time
 }
 
 func (q *Queries) CreatePullRequest(ctx context.Context, arg CreatePullRequestParams) error {
-	_, err := q.db.ExecContext(ctx, createPullRequest, arg.PullRequestID, arg.PullRequestName, arg.AuthorID)
+	_, err := q.db.ExecContext(ctx, createPullRequest,
+		arg.PullRequestID,
+		arg.PullRequestName,
+		arg.AuthorID,
+		arg.CreatedAt,
+	)
 	return err
 }
 

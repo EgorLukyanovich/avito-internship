@@ -6,7 +6,7 @@ CREATE TABLE pull_requests (
     pull_request_name VARCHAR NOT NULL,
     author_id VARCHAR NOT NULL REFERENCES users(user_id),
     status pr_status NOT NULL DEFAULT 'OPEN',
-    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    created_at TIMESTAMP NOT NULL DEFAULT now(),
     merged_at TIMESTAMP WITH TIME ZONE
 );
 

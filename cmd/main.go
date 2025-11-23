@@ -9,12 +9,6 @@ import (
 	"github.com/egor_lukyanovich/avito/pkg/app"
 )
 
-/*
-TODO:
-
-	Подумать как автоматизировать поднятие зависимостей
-	Перед сдачей не забудь поменять url в goose с localhost на db инчае будут ошибки
-*/
 func main() {
 	storage, port, err := app.InitDB()
 	if err != nil {
@@ -25,6 +19,7 @@ func main() {
 
 	teamHandlers := handlers.NewTeamHandlers(storage.Queries)
 	userHandlers := handlers.NewUserHandlers(storage.Queries)
+	pullReqHadnlers := handlers.NewPullRequestHandlers(storage.Queries)
 	router := routing.NewRouter(*storage)
 
 	router.Post("/team/add", teamHandlers.AddTeam)
@@ -35,6 +30,10 @@ func main() {
 	router.Delete("/users/delete", userHandlers.DeleteUser)
 	router.Post("/users/setIsActive", userHandlers.SetUserActive)
 	router.Post("/users/upsertUser", userHandlers.UpsertUser)
+
+	router.Post("/pullRequest/create", pullReqHadnlers.CreatePullRequest)
+	router.Post("/pullRequest/merge", pullReqHadnlers.MergePullRequest)
+	router.Post("/pullRequest/reassign", pullReqHadnlers.ReassignReviewer)
 
 	server := &http.Server{
 		Handler: router,

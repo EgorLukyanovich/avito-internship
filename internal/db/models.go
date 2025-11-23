@@ -8,6 +8,7 @@ import (
 	"database/sql"
 	"database/sql/driver"
 	"fmt"
+	"time"
 )
 
 type PrStatus string
@@ -57,7 +58,7 @@ type PullRequest struct {
 	PullRequestName string
 	AuthorID        string
 	Status          PrStatus
-	CreatedAt       sql.NullTime
+	CreatedAt       time.Time
 	MergedAt        sql.NullTime
 }
 
