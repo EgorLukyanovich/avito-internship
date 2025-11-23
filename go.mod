@@ -3,7 +3,6 @@ module github.com/egor_lukyanovich/avito
 go 1.25.0
 
 require (
-	github.com/google/uuid v1.6.0
 	github.com/jackc/pgx/v5 v5.7.6
 	github.com/joho/godotenv v1.5.1
 )

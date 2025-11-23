@@ -34,7 +34,9 @@ func InitDB() (*Storage, string, error) {
 		log.Fatal("Port string is not found in .env")
 	}
 
-	db.PingContext(context.Background())
+	if err := db.PingContext(context.Background()); err != nil {
+		log.Fatal("db ping failed: ", err)
+	}
 
 	queries := DB.New(db)
 

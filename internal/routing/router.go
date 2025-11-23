@@ -1,6 +1,7 @@
 package routing
 
 import (
+	"log"
 	"net/http"
 
 	"github.com/egor_lukyanovich/avito/pkg/app"
@@ -11,7 +12,10 @@ func NewRouter(storage app.Storage) *chi.Mux {
 	r := chi.NewRouter()
 
 	r.Get("/health", func(w http.ResponseWriter, r *http.Request) {
-		w.Write([]byte("OK"))
+		if _, err := w.Write([]byte("OK")); err != nil {
+			log.Println("write response failed:", err)
+		}
+
 	})
 
 	return r

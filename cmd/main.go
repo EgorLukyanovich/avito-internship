@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"time"
 
 	handlers "github.com/egor_lukyanovich/avito/internal/handlers"
 	"github.com/egor_lukyanovich/avito/internal/routing"
@@ -20,6 +21,7 @@ func main() {
 	teamHandlers := handlers.NewTeamHandlers(storage.Queries)
 	userHandlers := handlers.NewUserHandlers(storage.Queries)
 	pullReqHadnlers := handlers.NewPullRequestHandlers(storage.Queries)
+	statsHandler := handlers.NewStatsHandler(storage.Queries)
 	router := routing.NewRouter(*storage)
 
 	router.Post("/team/add", teamHandlers.AddTeam)
@@ -35,9 +37,12 @@ func main() {
 	router.Post("/pullRequest/merge", pullReqHadnlers.MergePullRequest)
 	router.Post("/pullRequest/reassign", pullReqHadnlers.ReassignReviewer)
 
+	router.Get("/stats", statsHandler.GetStats)
+
 	server := &http.Server{
-		Handler: router,
-		Addr:    port,
+		Handler:           router,
+		Addr:              port,
+		ReadHeaderTimeout: 10 * time.Second,
 	}
 
 	log.Printf("Starting server on :%s", server.Addr)
